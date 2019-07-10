@@ -1,0 +1,9 @@
+{
+	"token": "<TOKEN>",
+	"repositories": [
+		{
+			"owner": "<OWNER>",
+			"name": "<REPO>"
+		}
+	]
+}
