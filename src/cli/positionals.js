@@ -18,10 +18,16 @@ module.exports = {
 		default: "id",
 		optional: true,
 	},
+	labelOutput: {
+		type: "array",
+		describe: "the label fields to retrieve",
+		default: [ "node_id", "name", "description" ],
+		optional: true,
+	},
 	milestoneOutput: {
 		type: "array",
 		describe: "the milestone fields to retrieve",
-		default: [ "id", "number", "title", "description" ],
+		default: [ "node_id", "title", "description" ],
 		optional: true,
 	},
 	fields: {
@@ -35,5 +41,11 @@ module.exports = {
 		describe: "Object containing pagination",
 		default: { last: 100 },
 		optional: true,
-	}
+	},
+	searchIn: {
+		type: "array",
+		describe: "Fields to search in",
+		default: [ "name", "title", "description" ],
+		optional: true,
+	},
 };

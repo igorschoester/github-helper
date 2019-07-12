@@ -29,7 +29,29 @@ class Query {
 			.then( ( { repository } ) => repository );
 	}
 
-	label( { label, repo, pagination, output = "id name description" } ) {
+	labels( { repo, output = [ "node_id", "name", "description" ] } ) {
+		const repositoryInfo = utils.determineRepository( repo, this._repositories );
+		return this._rest.issues.listLabelsForRepo( {
+			owner: repositoryInfo.owner,
+			repo: repositoryInfo.name,
+		} )
+			.then( ( { data } ) => utils.filterArrayObjectKeys( data, output ) );
+	}
+
+
+	label( { label, repo, searchIn = [ "name", "description" ], output = [ "node_id", "name", "description" ] } ) {
+		const repositoryInfo = utils.determineRepository( repo, this._repositories );
+		return this._rest.issues.listLabelsForRepo( {
+			owner: repositoryInfo.owner,
+			repo: repositoryInfo.name,
+		} )
+			.then( ( { data } ) => {
+				const matches = utils.findObjectValuesInArray( label, data, searchIn );
+				return utils.filterArrayObjectKeys( matches, output );
+			} );
+	}
+
+	labelV4( { label, repo, pagination, output = "id name description" } ) {
 		const page = utils.determinePaginationVariables( pagination );
 		return this._api(
 			schema.query(
@@ -47,7 +69,7 @@ class Query {
 			.then( ( { repository: { labels: { nodes } } } ) => nodes );
 	}
 
-	milestones( { repo, output = [ "id", "number", "title", "description" ] } ) {
+	milestones( { repo, output = [ "node_id", "title", "description" ] } ) {
 		const repositoryInfo = utils.determineRepository( repo, this._repositories );
 		return this._rest.issues.listMilestonesForRepo( {
 			owner: repositoryInfo.owner,
@@ -56,23 +78,14 @@ class Query {
 			.then( ( { data } ) => utils.filterArrayObjectKeys( data, output ) );
 	}
 
-	milestone( { milestone, repo, output = [ "id", "number", "title", "description" ] } ) {
+	milestone( { milestone, repo, searchIn = [ "title", "description" ], output = [ "node_id", "title", "description" ] } ) {
 		const repositoryInfo = utils.determineRepository( repo, this._repositories );
 		return this._rest.issues.listMilestonesForRepo( {
 			owner: repositoryInfo.owner,
 			repo: repositoryInfo.name,
 		} )
 			.then( ( { data } ) => {
-				const matches = [];
-				const needle = milestone.toLowerCase();
-				data.forEach( milestone => {
-					if (
-						milestone.title.toLowerCase().indexOf( needle ) !== -1 ||
-						milestone.description.toLowerCase().indexOf( needle ) !== -1
-					) {
-						matches.push( milestone );
-					}
-				} );
+				const matches = utils.findObjectValuesInArray( milestone, data, searchIn );
 				return utils.filterArrayObjectKeys( matches, output );
 			} );
 	}
