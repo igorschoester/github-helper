@@ -1,9 +1,14 @@
 {
-	"token": "<TOKEN>",
-	"repositories": [
-		{
-			"owner": "<OWNER>",
-			"name": "<REPO>"
-		}
-	]
+  "token": "<TOKEN>",
+  "repositories": [
+    {
+      "owner": "<OWNER>",
+      "name": "<NAME>",
+      "points": {
+        "release": 1,
+        "rc": 1,
+        "rc+": 0.5
+      }
+    }
+  ]
 }

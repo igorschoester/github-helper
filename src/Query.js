@@ -1,3 +1,5 @@
+/* global require, module */
+
 const graphql = require( "@octokit/graphql" );
 const Octokit = require( "@octokit/rest" );
 const schema = require( "./schema" );
@@ -18,7 +20,7 @@ class Query {
 		this._repositories = repositories;
 	}
 
-	repository( { repo, output = "id" } ) {
+	repository( { repo = {}, output = "id" } = {} ) {
 		return this._api(
 			schema.query(
 				"$owner:String! $name:String!",
@@ -29,21 +31,22 @@ class Query {
 			.then( ( { repository } ) => repository );
 	}
 
-	labels( { repo, output = [ "node_id", "name", "description" ] } ) {
+	labels( { repo = {}, output = [ "node_id", "name", "description" ] } = {} ) {
 		const repositoryInfo = utils.determineRepository( repo, this._repositories );
 		return this._rest.issues.listLabelsForRepo( {
 			owner: repositoryInfo.owner,
 			repo: repositoryInfo.name,
+			per_page: 9999,
 		} )
 			.then( ( { data } ) => utils.filterArrayObjectKeys( data, output ) );
 	}
 
-
-	label( { label, repo, searchIn = [ "name", "description" ], output = [ "node_id", "name", "description" ] } ) {
+	label( { label, repo = {}, searchIn = [ "name", "description" ], output = [ "node_id", "name", "description" ] } ) {
 		const repositoryInfo = utils.determineRepository( repo, this._repositories );
 		return this._rest.issues.listLabelsForRepo( {
 			owner: repositoryInfo.owner,
 			repo: repositoryInfo.name,
+			per_page: 9999,
 		} )
 			.then( ( { data } ) => {
 				const matches = utils.findObjectValuesInArray( label, data, searchIn );
@@ -51,7 +54,7 @@ class Query {
 			} );
 	}
 
-	labelV4( { label, repo, pagination, output = "id name description" } ) {
+	labelV4( { label, repo = {}, pagination = {}, output = "id name description" } ) {
 		const page = utils.determinePaginationVariables( pagination );
 		return this._api(
 			schema.query(
@@ -69,20 +72,22 @@ class Query {
 			.then( ( { repository: { labels: { nodes } } } ) => nodes );
 	}
 
-	milestones( { repo, output = [ "node_id", "title", "description" ] } ) {
+	milestones( { repo = {}, output = [ "node_id", "title", "description" ] } = {} ) {
 		const repositoryInfo = utils.determineRepository( repo, this._repositories );
 		return this._rest.issues.listMilestonesForRepo( {
 			owner: repositoryInfo.owner,
 			repo: repositoryInfo.name,
+			per_page: 9999,
 		} )
 			.then( ( { data } ) => utils.filterArrayObjectKeys( data, output ) );
 	}
 
-	milestone( { milestone, repo, searchIn = [ "title", "description" ], output = [ "node_id", "title", "description" ] } ) {
+	milestone( { milestone, repo = {}, searchIn = [ "title", "description" ], output = [ "node_id", "title", "description" ] } ) {
 		const repositoryInfo = utils.determineRepository( repo, this._repositories );
 		return this._rest.issues.listMilestonesForRepo( {
 			owner: repositoryInfo.owner,
 			repo: repositoryInfo.name,
+			per_page: 9999,
 		} )
 			.then( ( { data } ) => {
 				const matches = utils.findObjectValuesInArray( milestone, data, searchIn );
@@ -90,7 +95,7 @@ class Query {
 			} );
 	}
 
-	createIssue( { repo, fields } ) {
+	createIssue( { repo = {}, fields = {} } = {} ) {
 		return this.repository( { repo } )
 			.then( ( { id } ) => this._api(
 				schema.createIssue(),
@@ -100,7 +105,8 @@ class Query {
 						...fields,
 					}
 				}
-			) );
+			) )
+			.then( ( { createIssue } ) => createIssue );
 	}
 }
 

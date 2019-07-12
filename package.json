@@ -1,6 +1,6 @@
 {
-  "name": "github",
-  "version": "0.0.0",
+  "name": "github-helper",
+  "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -9,7 +9,8 @@
     "@octokit/rest": "^16.28.3",
     "yargs": "^13.2.4"
   },
-  "scripts": {
-    "start": "node index.js"
+  "bin": {
+    "cli": "./bin/cli.js",
+    "createIssues": "./bin/createIssues.js"
   }
 }
