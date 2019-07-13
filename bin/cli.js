@@ -49,6 +49,18 @@ const yargs = require( "yargs" )
 		yargv => utils.wrapRequest( query.milestone( yargv ) )
 	)
 	.command(
+		"projects [state] [pagination] [repo] [output]",
+		"Retrieve projects",
+		yargs => applyPositionals( yargs, [ "projectState", "pagination", "repo", "projectOutput" ] ),
+		yargv => utils.wrapRequest( query.projects( yargv ) )
+	)
+	.command(
+		"project <project> [state] [pagination] [repo] [output]",
+		"Retrieve projects",
+		yargs => applyPositionals( yargs, [ "project", "projectState", "pagination", "repo", "projectOutput" ] ),
+		yargv => utils.wrapRequest( query.project( yargv ) )
+	)
+	.command(
 		"createIssue [repo] [fields]",
 		"Create an issue",
 		yargs => applyPositionals( yargs, [ "repo", "fields" ] ),

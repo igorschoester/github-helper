@@ -4,7 +4,7 @@ module.exports = {
 	repo: {
 		type: "object",
 		default: {},
-		describe: "Object containing the [owner] and [name] of the repository",
+		describe: "Object containing the [owner] and [name] of the repository. Or an index from the repository configuration.",
 	},
 	label: {
 		type: "string",
@@ -13,6 +13,10 @@ module.exports = {
 	milestone: {
 		type: "string",
 		describe: "query milestones by title and description",
+	},
+	project: {
+		type: "string",
+		describe: "query projects by name",
 	},
 	output: {
 		type: "string",
@@ -32,6 +36,12 @@ module.exports = {
 		default: [ "node_id", "title", "description" ],
 		optional: true,
 	},
+	projectOutput: {
+		type: "string",
+		describe: "the fields to retrieve",
+		default: "id name",
+		optional: true,
+	},
 	fields: {
 		type: "object",
 		describe: "Object containing any fields",
@@ -48,6 +58,13 @@ module.exports = {
 		type: "array",
 		describe: "Fields to search in",
 		default: [ "name", "title", "description" ],
+		optional: true,
+	},
+	projectState: {
+		type: "string",
+		choices: [ "OPEN", "CLOSED" ],
+		describe: "State of the project. Can be OPEN or CLOSED",
+		default: "OPEN",
 		optional: true,
 	},
 };

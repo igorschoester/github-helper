@@ -95,6 +95,51 @@ class Query {
 			} );
 	}
 
+	projects( { state = "OPEN", repo = {}, pagination = {}, output = "id name" } = {} ) {
+		const repositoryInfo = utils.determineRepository( repo, this._repositories );
+		const page = utils.determinePaginationVariables( pagination );
+		return this._api(
+			schema.query(
+				`$login:String! ${ page.query } $state:[ProjectState!]`,
+				schema.organization(
+					schema.projects(
+						`states:$state ${ page.label }`,
+						output
+					)
+				)
+			),
+			{
+				login: repositoryInfo.owner,
+				...pagination,
+				state,
+			}
+		)
+			.then( ( { organization: { projects: { nodes } } } ) => nodes );
+	}
+
+	project( { project, state = "OPEN", repo = {}, pagination = {}, output = "id name" } = {} ) {
+		const repositoryInfo = utils.determineRepository( repo, this._repositories );
+		const page = utils.determinePaginationVariables( pagination );
+		return this._api(
+			schema.query(
+				`$login:String! ${ page.query } $state:[ProjectState!] $search:String!`,
+				schema.organization(
+					schema.projects(
+						`states:$state ${ page.label } search:$search`,
+						output
+					)
+				)
+			),
+			{
+				login: repositoryInfo.owner,
+				...pagination,
+				state,
+				search: project,
+			}
+		)
+			.then( ( { organization: { projects: { nodes } } } ) => nodes );
+	}
+
 	createIssue( { repo = {}, fields = {} } = {} ) {
 		return this.repository( { repo } )
 			.then( ( { id } ) => this._api(
