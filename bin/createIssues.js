@@ -44,6 +44,10 @@ const determineOptions = ( type, repository ) => {
 	}
 
 	const options = {};
+	if ( repository.project ) {
+		options.project = repository.project;
+	}
+
 	switch ( type ) {
 		case "release":
 			options.title = `Release ${ version }`;
@@ -71,32 +75,51 @@ const query = new Query(
 
 const createIssue = async ( repository ) => {
 	const options = determineOptions( type, repository );
-	let [ labels, milestones ] = await Promise.all( [ query.labels( { repo: repository } ), query.milestones( { repo: repository } ) ] );
-	labels = utils.arrayToObject( labels, "name" );
-	milestones = utils.arrayToObject( milestones, "title" );
+	const data = {
+		repo: {
+			owner: repository.owner,
+			name: repository.name,
+		},
+		fields: {
+			title: options.title,
+		},
+	};
+	const requests = [ query.labels( { repo: repository } ), query.milestones( { repo: repository } ) ];
 
+	if ( options.project ) {
+		requests.push( query.project( { project: options.project, repo: repository, pagination: { first: 1 } } ) );
+	}
+
+	let [ labels, milestones, projects ] = await Promise.all( requests );
+
+	data.fields.labelIds = [];
+	labels = utils.arrayToObject( labels, "name" );
 	for ( let i = 0; i < options.labels.length; i++ ) {
 		const label = labels[ options.labels[ i ] ];
 		if ( ! label ) {
 			warn( `Label '${ options.labels[ i ] }' not found in '${ repository.name }'. Skipping.` );
 			return;
 		}
-		options.labels[ i ] = label.node_id;
+		data.fields.labelIds.push( label.node_id );
 	}
+
+	milestones = utils.arrayToObject( milestones, "title" );
 	if ( ! milestones[ options.milestone ] ) {
 		warn( `Milestone '${ options.milestone }' not found in ${ repository.name }. Skipping.` );
 		return;
 	}
-	options.milestone = milestones[ options.milestone ].node_id;
+	data.fields.milestoneId = milestones[ options.milestone ].node_id;
 
-	query.createIssue( {
-		repo: repository,
-		fields: {
-			title: options.title,
-			labelIds: options.labels,
-			milestoneId: options.milestone,
+	if ( projects && projects.length > 0 ) {
+		projects = utils.arrayToObject( projects, "name" );
+		if ( ! projects[ options.project ] ) {
+			warn( `Project '${ options.project }' not found in ${ repository.owner }. Skipping.` );
+			return;
 		}
-	} )
+		data.fields.projectIds = [ projects[ options.project ].id ];
+	}
+
+	query.createIssue( data )
 		.then( () => log( "Issue created successfully." ) )
 		.catch( e => error( "Error trying to create issue.", e ) );
 };

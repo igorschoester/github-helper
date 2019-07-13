@@ -4,6 +4,7 @@
     {
       "owner": "<OWNER>",
       "name": "<NAME>",
+      "project": "[PROJECT]",
       "points": {
         "release": 1,
         "rc": 1,
